@@ -1,0 +1,31 @@
+<?php
+// $Id: odfimport.install,v 1.1 2009/12/24 13:58:56 vivekkhurana Exp $
+/**
+ * @file
+ * Install, update and uninstall functions for the odfimport module.
+ */
+
+function odfimport_requirements($phase) {
+  $t = get_t();
+  $requirements = array();
+  switch ($phase) {
+    case 'install':
+    case 'runtime':
+      if (!extension_loaded('xmlreader')) {
+        $requirements['odfimport'] = array(
+          'value' => $t('Not installed'),
+          'severity' => REQUIREMENT_ERROR,
+          'description' => $t('The XMLReader extension for PHP is missing. Please check the <a href="@url">PHP XMLReader documentation</a> for information on how to correct this.', array('@url' => 'http://php.net/manual/en/book.xmlreader.php')),
+        );
+      }
+      if (!extension_loaded('zip')) {
+        $requirements['odfimport'] = array(
+          'value' => $t('Not installed'),
+          'severity' => REQUIREMENT_ERROR,
+          'description' => $t('The Zip extension for PHP is missing. Please check the <a href="@url">PHP Zip documentation</a> for information on how to correct this.', array('@url' => 'http://php.net/manual/en/book.zip.php')),
+        );
+      }
+    break;
+  }
+  return $requirements;
+}

@@ -1,0 +1,4 @@
+Ophir ODT Import 7.x-0.0 2012-02-28
+-----------------------------
+First release of ophir-odfimport module, based on odfimport (http://drupal.org/project/odfimport).
+

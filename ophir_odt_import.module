@@ -1,0 +1,63 @@
+<?php
+// $Id: ophir_odt_import.module,v 1.1.2.1 2010/02/02 15:45:51 vivekkhurana Exp $
+
+/**
+ * Implementation hook_perm().
+ */
+function ophir_odt_import_perm() {
+  return array('import odf');
+}
+
+/**
+ * Implementation hook_menu().
+ */
+function ophir_odt_import_form_alter(&$form, $form_state, $form_id) {
+  if (isset($form['type']) && $form['type']['#value'] . '_node_form' == $form_id) {
+    $form['ophir_odt_import'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('ODF file import'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#description' => t('Select a file to import. This file will be parsed and set as content body. Make sure you do not have anything in the body field while importing an ODF file, as the import will overwrite the content body'),
+      '#attributes' => array('id' => 'ophir_odt_import-fieldset'),
+    );
+    $form['ophir_odt_import']['importfile'] = array(
+      '#type' => 'file',
+      '#title' => t('File to import'),
+      '#size' => 50,
+    );
+    $form['ophir_odt_import']['#access'] = user_access('import odf');
+    $form['#attributes']['enctype'] = 'multipart/form-data';
+    drupal_add_js(drupal_get_path('module', 'ophir_odt_import') . '/ophir_odt_import.validate.js');
+  }
+
+}
+
+/*
+ * Implementation of hook_nodeapi().
+ */
+
+function ophir_odt_import_node_validate($node, $form, &$form_state) {
+	$extensions = 'odt ';
+	$file = new stdClass();
+	$file->filename = file_munge_filename(trim(basename($_FILES['files']['name']['importfile']), '.'), $extensions);
+	$file->filemime = file_get_mimetype($file->filename);
+	if ($file->filemime != 'application/vnd.oasis.opendocument.text') {
+		form_set_error('importfile', t('File uploaded is not a odt file'));
+	}
+}
+
+function ophir_odt_import_node_submit($node, $form, &$form_state) {
+	if ($_FILES['files']['tmp_name']['importfile'] && user_access('import odf')) {
+		$response = parse_odt($_FILES['files']['tmp_name']['importfile']);
+		if ($response['error'] === '') {
+		  $node->body[LANGUAGE_NONE][0]['value'] = $response['content'];
+		  $node->body[LANGUAGE_NONE][0]['format'] = 'full_html';
+		}
+	}
+}
+
+function parse_odt($file) {
+	require_once("ophir.php");
+  return array('error' => '', 'content' => xml2html(odt2xml($file)));
+}

@@ -1,0 +1,13 @@
+Introduction
+-----------------
+
+ Ophir ODT Import module allows you to import odt files into drupal nodes. Most style information from ODT file will be dropped but content and all elements should be imported...
+
+Requirements
+----------------
+
+ODF import requires following php extensions to be installed.
+
+1) ZipArchive
+2) XMLReader
+
