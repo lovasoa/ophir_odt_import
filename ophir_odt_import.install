@@ -10,20 +10,20 @@ function ophir_odt_import_requirements($phase) {
   switch ($phase) {
     case 'install':
     case 'runtime':
-      if (!extension_loaded('xmlreader')) {
-        $requirements['odfimport'] = array(
+      $requirements[] = array(
+          'title' => 'XML reader',
           'value' => $t('Not installed'),
-          'severity' => REQUIREMENT_ERROR,
+          'severity' => (extension_loaded('xmlreader')) ? REQUIREMENT_OK : REQUIREMENT_ERROR,
           'description' => $t('The XMLReader extension for PHP is missing. Please check the <a href="@url">PHP XMLReader documentation</a> for information on how to correct this.', array('@url' => 'http://php.net/manual/en/book.xmlreader.php')),
         );
-      }
-      if (!extension_loaded('zip')) {
-        $requirements['odfimport'] = array(
+
+        $requirements[] = array(
+          'title' => 'Zip Extension',
           'value' => $t('Not installed'),
-          'severity' => REQUIREMENT_ERROR,
-          'description' => $t('The Zip extension for PHP is missing. Please check the <a href="@url">PHP Zip documentation</a> for information on how to correct this.', array('@url' => 'http://php.net/manual/en/book.zip.php')),
+          'severity' => (in_array("zip", stream_get_wrappers())) ? REQUIREMENT_ERROR : REQUIREMENT_ERROR,
+          'description' => $t('The Zip stream wrapper is missing. Please check the <a href="@url">PHP Zip documentation</a> for information on how to correct this.', array('@url' => 'http://php.net/manual/en/book.zip.php')),
         );
-      }
+
     break;
   }
   return $requirements;
