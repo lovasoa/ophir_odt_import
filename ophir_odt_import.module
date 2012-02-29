@@ -1,15 +1,15 @@
 <?php
-// $Id: ophir_odt_import.module,v 1.1.2.1 2010/02/02 15:45:51 vivekkhurana Exp $
 
 /**
- * Implementation hook_perm().
+ * Implements hook_perm().
  */
 function ophir_odt_import_perm() {
   return array('import odf');
 }
 
+
 /**
- * Implementation hook_menu().
+ * Implements hook_form_alter().
  */
 function ophir_odt_import_form_alter(&$form, $form_state, $form_id) {
   if (isset($form['type']) && $form['type']['#value'] . '_node_form' == $form_id) {
@@ -33,31 +33,33 @@ function ophir_odt_import_form_alter(&$form, $form_state, $form_id) {
 
 }
 
-/*
- * Implementation of hook_nodeapi().
+/**
+ * Implements hook_node_validate().
  */
-
 function ophir_odt_import_node_validate($node, $form, &$form_state) {
-	$extensions = 'odt ';
-	$file = new stdClass();
-	$file->filename = file_munge_filename(trim(basename($_FILES['files']['name']['importfile']), '.'), $extensions);
-	$file->filemime = file_get_mimetype($file->filename);
-	if ($file->filemime != 'application/vnd.oasis.opendocument.text') {
-		form_set_error('importfile', t('File uploaded is not a odt file'));
-	}
+  $extensions = 'odt ';
+  $file = new stdClass();
+  $file->filename = file_munge_filename(trim(basename($_FILES['files']['name']['importfile']), '.'), $extensions);
+  $file->filemime = file_get_mimetype($file->filename);
+  if ($file->filemime != 'application/vnd.oasis.opendocument.text') {
+    form_set_error('importfile', t('File uploaded is not a odt file'));
+  }
 }
 
+/**
+ * Implements hook_node_submit().
+ */
 function ophir_odt_import_node_submit($node, $form, &$form_state) {
-	if ($_FILES['files']['tmp_name']['importfile'] && user_access('import odf')) {
-		$response = parse_odt($_FILES['files']['tmp_name']['importfile']);
-		if ($response['error'] === '') {
-		  $node->body[LANGUAGE_NONE][0]['value'] = $response['content'];
-		  $node->body[LANGUAGE_NONE][0]['format'] = 'full_html';
-		}
-	}
+  if ($_FILES['files']['tmp_name']['importfile'] && user_access('import odf')) {
+    $response = parse_odt($_FILES['files']['tmp_name']['importfile']);
+    if ($response['error'] === '') {
+      $node->body[LANGUAGE_NONE][0]['value'] = $response['content'];
+      $node->body[LANGUAGE_NONE][0]['format'] = 'full_html';
+    }
+  }
 }
 
 function parse_odt($file) {
-	require_once("ophir.php");
+  require_once("ophir.php");
   return array('error' => '', 'content' => xml2html(odt2xml($file)));
 }

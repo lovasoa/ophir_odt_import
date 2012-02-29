@@ -1,11 +1,10 @@
 <?php
-// $Id: odfimport.install,v 1.1 2009/12/24 13:58:56 vivekkhurana Exp $
 /**
  * @file
- * Install, update and uninstall functions for the odfimport module.
+ * Install, update and uninstall functions for the Ophir ODT Import module.
  */
 
-function odfimport_requirements($phase) {
+function ophir_odt_import_requirements($phase) {
   $t = get_t();
   $requirements = array();
   switch ($phase) {
