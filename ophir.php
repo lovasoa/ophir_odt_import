@@ -12,39 +12,72 @@
  1 : print as simple text (do not apply any HTML tag or style)
  2 : print  and apply all supported HTML tags and styles
  */
-$OPHIR_CONF = array(
-  "header" => 2,
-  "list" => 2,
-  "table" => 2,
-  "footnote" => 2,
-  "link" => 2,
-  "image" => 2,
-  "note" => 2,
-  "annotation" => 2
+$_ophir_odt_import_conf = array(
+  "features" => array (  
+    "header" => 2,
+    "list" => 2,
+    "table" => 2,
+    "footnote" => 2,
+    "link" => 2,
+    "image" => 2,
+    "note" => 2,
+    "annotation" => 2,
+    ),
+  "images_folder" => "images"
 );
 
-function odt2xml($odt_file) {
-  global $_ophir_odt_import_zip;
-  $_ophir_odt_import_zip = new ZipArchive();
-  $_ophir_odt_import_zip->open($odt_file) or die("Error: Unable to open the document. ");
-  $contents = $_ophir_odt_import_zip->getFromName('content.xml');
-  if ($contents===FALSE) die("Error: Unable to access file contents.\n");
+function ophir_is_image ($file) {
+    $image_extensions = array("jpg", "jpeg", "png", "gif", "svg");
+    $ext = pathinfo($file, PATHINFO_EXTENSION);
+    if (!in_array($ext, $image_extensions)) return FALSE;
 
-
-  $xml = new XMLReader();
-  $xml->xml($contents);
-  return $xml;
+    if (function_exists("image_get_info"))
+      return (strpos(@mime_content_type($file), 'image') === 0);
 }
 
-function base64_encode_image($filename, $filetype) {
-    if ($filename) {
-        $imgbinary = fread(fopen($filename, "r"), filesize($filename));
-        return 'data:image/' . $filetype . ';base64,' . base64_encode($imgbinary);
+function ophir_copy_file($from, $to) {
+  if (function_exists('file_unmanaged_copy')){
+    $filename = file_unmanaged_save_data(file_get_contents($from), $to, FILE_EXISTS_REPLACE);
+    return ($filename) ? file_create_url($filename) : false;
+  }else {
+    if (file_exists($to)) {
+      $i = pathinfo($to);
+      $to = $i['dirname'] . '/' . $i['filename'] . time() . '.' . $i['extension'];
     }
+    return (copy($from, $to)) ? $to : FALSE;
+  }
 }
 
-function xml2html($xml) {
-  global $_ophir_odt_import_zip, $OPHIR_CONF;
+function ophir_error($error){
+  if (function_exists("drupal_set_message")){
+        drupal_set_message(t($error), 'error');
+  }else{
+    echo '<div style="color:red;font-size:2em;">' . $error . '</div>';
+  }
+}
+
+/*
+ * Function that parses the XML and outputs HTML. If $xml is not provided,
+ * extract content.xml from $odt_file
+ */
+function odt2html($odt_file, $xml_string=NULL) {
+  global $_ophir_odt_import_conf;
+  
+  $xml = new XMLReader();
+
+  if ($xml_string===NULL){
+    if (@$xml->open('zip://'.$odt_file.'#content.xml') === FALSE) {
+      ophir_error("Unable to read file contents.");
+      return false;
+    }
+  }else{
+    if(@$xml->xml($xml_string)===FALSE) {
+      ophir_error("Invalid file contents.");
+      return false;
+    }
+  }
+
+  //Now, convert the xml from a string to an 
   $html = "";
 
   $elements_tree = array();
@@ -53,15 +86,15 @@ function xml2html($xml) {
 
   $footnotes = "";
 
-  if ($OPHIR_CONF["list"]===0) $translation_table["text:list"] = FALSE;
-  elseif ($OPHIR_CONF["list"]===2) {
+  if ($_ophir_odt_import_conf["features"]["list"]===0) $translation_table["text:list"] = FALSE;
+  elseif ($_ophir_odt_import_conf["features"]["list"]===2) {
     $translation_table["text:list"] = "ul";
     $translation_table["text:list-item"] = "li";
   }
 
   $translation_table = array();
-  if ($OPHIR_CONF["table"]===0) $translation_table["table:table"] = FALSE;
-  elseif ($OPHIR_CONF["table"]===2) {
+  if ($_ophir_odt_import_conf["features"]["table"]===0) $translation_table["table:table"] = FALSE;
+  elseif ($_ophir_odt_import_conf["features"]["table"]===2) {
     $translation_table["table:table"] = "table cellspacing=0 cellpadding=0 border=1";
     $translation_table["table:table-row"] = "tr";
     $translation_table["table:table-cell"] = "td";
@@ -99,11 +132,11 @@ function xml2html($xml) {
           $html .= htmlspecialchars($xml->value);
           break;
         case "text:h"://Title
-          if ($OPHIR_CONF["header"]===0) {
+          if ($_ophir_odt_import_conf["features"]["header"]===0) {
             $xml->next();
             break;
           }
-          elseif ($OPHIR_CONF["header"]===1) break;
+          elseif ($_ophir_odt_import_conf["features"]["header"]===1) break;
           $n = $xml->getAttribute("text:outline-level");
           if ($n>6) $n=6;
           $opened_tags[] = "h$n";
@@ -121,24 +154,41 @@ function xml2html($xml) {
           break;
 
         case "text:a":
-          if ($OPHIR_CONF["link"]===0) {
+          if ($_ophir_odt_import_conf["features"]["link"]===0) {
             $xml->next();
             break;
           }
-          elseif ($OPHIR_CONF["link"]===1) break;
+          elseif ($_ophir_odt_import_conf["features"]["link"]===1) break;
           $href = $xml->getAttribute("xlink:href");
           $opened_tags[] = 'a';
           $html .= '<a href="' . $href . '">';
           break;
 
         case "draw:image":
-          if ($OPHIR_CONF["image"]===0) {
+          if ($_ophir_odt_import_conf["features"]["image"]===0) {
             $xml->next();
             break;
           }
-          elseif ($OPHIR_CONF["image"]===1) break;
-          $src = $xml->getAttribute("xlink:href");
-          $src = 'data:image;base64,' . base64_encode($_ophir_odt_import_zip->getFromName($src));
+          elseif ($_ophir_odt_import_conf["features"]["image"]===1) break;
+
+          $image_file = 'zip://' . $odt_file . '#' . $xml->getAttribute("xlink:href");
+          if (isset($_ophir_odt_import_conf["images_folder"]) &&
+              is_dir($_ophir_odt_import_conf["images_folder"]) ) {
+            if (ophir_is_image($image_file)) {
+              $image_to_save = $_ophir_odt_import_conf["images_folder"] . '/' . basename($image_file);
+              if ( !($src = ophir_copy_file ($image_file, $image_to_save))) {
+                ophir_error("Unable to move image file");
+                break;
+              } 
+            } else {
+              ophir_error("Found invalid image file." . $image_file);
+              break;
+            } 
+          }
+          else {
+            ophir_error('Unable to save the image. Creating a data URL. Image saved directly in the body.');
+            $src = 'data:image;base64,' . base64_encode(file_get_contents($image_file));
+          }
           $html .= "\n<img src=\"$src\">";
           $opened_tags[] = "img";
           break;
@@ -166,11 +216,11 @@ function xml2html($xml) {
           }
           break;
         case "text:note":
-          if ($OPHIR_CONF["note"]===0) {
+          if ($_ophir_odt_import_conf["features"]["note"]===0) {
             $xml->next();
             break;
           }
-          elseif ($OPHIR_CONF["note"]===1) break;
+          elseif ($_ophir_odt_import_conf["features"]["note"]===1) break;
           $note_id = $xml->getAttribute("text:id");
           $note_name = "Note";
           while ( $xml->read() && //Read one tag
@@ -181,9 +231,7 @@ function xml2html($xml) {
               $note_name = $xml->readString();
             elseif ($xml->name=="text:note-body" &&
             $xml->nodeType == XMLReader::ELEMENT) {
-              $tmp_reader = new XMLReader();
-              $tmp_reader->xml($xml->readOuterXML());
-              $note_content = xml2html($tmp_reader);
+              $note_content = odt2html($odt_file, $xml->readOuterXML());
             }
           }
 
@@ -196,11 +244,11 @@ function xml2html($xml) {
           break;
 
         case "office:annotation":
-          if ($OPHIR_CONF["annotation"]===0) {
+          if ($_ophir_odt_import_conf["features"]["annotation"]===0) {
     $xml->next();
     break;
     }
-          elseif ($OPHIR_CONF["annotation"]===1) break;
+          elseif ($_ophir_odt_import_conf["features"]["annotation"]===1) break;
           $annotation_id = (isset($annotation_id))?$annotation_id+1:1;
           $annotation_content = "";
           $annotation_creator = "Anonymous";
@@ -259,19 +307,6 @@ function xml2html($xml) {
                   "tags" => $opened_tags);
     }
 
-  /*
-  //Useful for debugging the $elements_tree stack
-  foreach ($elements_tree as $level) {
-    echo $level["name"]. " (" .implode(" ", $level["tags"]). ") > ";
-  }
-  echo "\n<br>" . $xml->readString(). "<br>";
-  echo "<br>\n";
-  */
-
   }
   return $html . $footnotes;
-}
-
-function odt2html($odt_file) {
-  return xml2html(odt2xml($odt_file));
 }
