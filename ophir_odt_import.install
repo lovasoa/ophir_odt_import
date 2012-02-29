@@ -10,21 +10,22 @@ function ophir_odt_import_requirements($phase) {
   switch ($phase) {
     case 'install':
     case 'runtime':
-      $requirements[] = array(
+      $requirements['xmlreader'] = array(
           'title' => 'XML reader',
           'value' => $t('Not installed'),
           'severity' => (extension_loaded('xmlreader')) ? REQUIREMENT_OK : REQUIREMENT_ERROR,
           'description' => $t('The XMLReader extension for PHP is missing. Please check the <a href="@url">PHP XMLReader documentation</a> for information on how to correct this.', array('@url' => 'http://php.net/manual/en/book.xmlreader.php')),
         );
 
-        $requirements[] = array(
+        $requirements['zip'] = array(
           'title' => 'Zip Extension',
           'value' => $t('Not installed'),
-          'severity' => (in_array("zip", stream_get_wrappers())) ? REQUIREMENT_ERROR : REQUIREMENT_ERROR,
+          'severity' => (in_array("zip", stream_get_wrappers())) ? REQUIREMENT_OK : REQUIREMENT_ERROR,
           'description' => $t('The Zip stream wrapper is missing. Please check the <a href="@url">PHP Zip documentation</a> for information on how to correct this.', array('@url' => 'http://php.net/manual/en/book.zip.php')),
         );
 
     break;
   }
+  drupal_set_message("Je suis là", "error");
   return $requirements;
 }
