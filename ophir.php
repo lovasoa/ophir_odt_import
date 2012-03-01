@@ -238,9 +238,9 @@ function odt2html($odt_file, $xml_string=NULL) {
             }
           }
 
-          $html .= "<sup><a href=\"#odt-$note_id\" name=\"anchor-odt-$note_id\">$note_name</a></sup>";
+          $html .= "<sup><a href=\"#odt-footnote-$note_id\" class=\"odt-footnote-anchor\" name=\"anchor-odt-$note_id\">$note_name</a></sup>";
 
-          $footnotes .= "\n" . '<div class="odt-footnotes" id="odt-' . $note_id . '" >';
+          $footnotes .= "\n" . '<div class="odt-footnote" id="odt-footnote-' . $note_id . '" >';
           $footnotes .= '<a class="footnote-name" href="#anchor-odt-' . $note_id . '">' . $note_name . ' .</a> ';
           $footnotes .= $note_content;
           $footnotes .= '</div>' . "\n";

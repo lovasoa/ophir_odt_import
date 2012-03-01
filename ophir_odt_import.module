@@ -36,15 +36,22 @@ function ophir_odt_import_form_node_form_alter(&$form, $form_state, $form_id) {
     $form['#attributes']['enctype'] = 'multipart/form-data';
     drupal_add_js(drupal_get_path('module', 'ophir_odt_import') . '/ophir_odt_import.validate.js');
   }
+}
 
+/*
+ * Implements function hook_node_view
+ */
+function ophir_odt_import_node_view($node, $view_mode, $langcode) {
+  drupal_add_library('system', 'ui.dialog');
+  drupal_add_js(drupal_get_path('module', 'ophir_odt_import') . '/ophir_odt_import.footnotes.js');
 }
 
 /**
  * Implements hook_help().
  */
-function node_ophir_odt_import_help($path, $arg) {
+function ophir_odt_import_help($path, $arg) {
   switch ($path) {
-    case 'examples/node_example':
+    case 'admin/help#ophir_odt_import':
       return "<p>" . t("The Ophir ODT Import allows you to import ODT
         files in drupal. Not all styling information are imported,
         but links, headings, quotes, and footnotes should be rendered
