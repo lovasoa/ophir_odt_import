@@ -1,0 +1,74 @@
+# $Id$
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  ophir_odt_import.module: n/a
+#  ophir_odt_import.install: n/a
+#  ophir_odt_import.info: n/a
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2012-03-01 01:49+0100\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: ophir_odt_import.module:9
+msgid "Import ODT files"
+msgstr ""
+
+#: ophir_odt_import.module:10
+msgid "Allows the user to choose an ODT file to import.\n      Not all users should have this permission, because this allows the user\n      to output anything to the browser, which is a security concern."
+msgstr ""
+
+#: ophir_odt_import.module:25
+msgid "ODT file import"
+msgstr ""
+
+#: ophir_odt_import.module:28
+msgid "Select a file to import. This file will be parsed and set as content body. Make sure you do not have anything in the body field while importing an ODT file, as the import will overwrite the content body"
+msgstr ""
+
+#: ophir_odt_import.module:33
+msgid "File to import"
+msgstr ""
+
+#: ophir_odt_import.module:49
+msgid "The Ophir ODT Import allows you to import ODT\n        files in drupal. Not all styling information are imported,\n        but links, headings, quotes, and footnotes should be rendered\n        correctly in drupal.\n          To access the import an ODT file, just create a new page, do not\n          fill the body textfield, and choose a file in <b>ODT file import</b>\n        "
+msgstr ""
+
+#: ophir_odt_import.module:69
+msgid "File uploaded is not a odt file"
+msgstr ""
+
+#: (duplicate) ophir_odt_import.install:15 ;22 
+msgid "Not installed"
+msgstr ""
+
+#: (duplicate) ophir_odt_import.install:17 
+msgid "The XMLReader extension for PHP is missing. Please check the <a href=\"@url\">PHP XMLReader documentation</a> for information on how to correct this."
+msgstr ""
+
+#: (duplicate) ophir_odt_import.install:24 
+msgid "The Zip stream wrapper is missing. Please check the <a href=\"@url\">PHP Zip documentation</a> for information on how to correct this."
+msgstr ""
+
+#: ophir_odt_import.info:0
+msgid "Ophir ODT Importer"
+msgstr ""
+
+#: ophir_odt_import.info:0
+msgid "Enables creating content by importing ODT files."
+msgstr ""
+
+#: ophir_odt_import.info:0
+msgid "ODT"
+msgstr ""
+
