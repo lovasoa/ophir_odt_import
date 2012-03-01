@@ -14,12 +14,12 @@ function ophir_odt_import_permission() {
   );
 }
 
-
 /**
  * Implements hook_form_alter().
  */
-function ophir_odt_import_form_alter(&$form, $form_state, $form_id) {
-  if (isset($form['type']) && $form['type']['#value'] . '_node_form' == $form_id) {
+function ophir_odt_import_form_node_form_alter(&$form, $form_state, $form_id) {
+//  if (isset($form['type']['#value']) && $form['type']['#value'] . '_node_form' == $form_id) {
+  if (isset($form["body"]["#type"]) && $form["body"]["#type"] === "container") {
     $form['ophir_odt_import'] = array(
       '#type' => 'fieldset',
       '#title' => t('ODT file import'),
@@ -43,7 +43,7 @@ function ophir_odt_import_form_alter(&$form, $form_state, $form_id) {
 /**
  * Implements hook_help().
  */
-function node_example_help($path, $arg) {
+function node_ophir_odt_import_help($path, $arg) {
   switch ($path) {
     case 'examples/node_example':
       return "<p>" . t("The Ophir ODT Import allows you to import ODT
