@@ -15,10 +15,9 @@ function ophir_odt_import_permission() {
 }
 
 /**
- * Implements hook_form_alter().
+ * Implements hook_form_node_form_alter().
  */
 function ophir_odt_import_form_node_form_alter(&$form, $form_state, $form_id) {
-//  if (isset($form['type']['#value']) && $form['type']['#value'] . '_node_form' == $form_id) {
   if (isset($form["body"]["#type"]) && $form["body"]["#type"] === "container") {
     $form['ophir_odt_import'] = array(
       '#type' => 'fieldset',
@@ -75,7 +74,7 @@ function ophir_odt_import_node_validate($node, $form, &$form_state) {
  * Implements hook_node_submit().
  */
 function ophir_odt_import_node_submit($node, $form, &$form_state) {
-  if ($_FILES['files']['tmp_name']['importfile'] && user_access('import odt')) {
+  if (@$_FILES['files']['tmp_name']['importfile'] && user_access('import odt')) {
     $response = parse_odt($_FILES['files']['tmp_name']['importfile']);
     if ($response['error'] === '') {
       $node->body[LANGUAGE_NONE][0]['value'] = $response['content'];

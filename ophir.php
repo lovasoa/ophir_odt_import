@@ -13,7 +13,7 @@
  2 : print  and apply all supported HTML tags and styles
  */
 $_ophir_odt_import_conf = array(
-  "features" => array (  
+  "features" => array (
     "header" => 2,
     "list" => 2,
     "table" => 2,
@@ -22,6 +22,7 @@ $_ophir_odt_import_conf = array(
     "image" => 2,
     "note" => 2,
     "annotation" => 2,
+    'table of contents' => 0,
     ),
   "images_folder" => "images"
 );
@@ -30,9 +31,7 @@ function ophir_is_image ($file) {
     $image_extensions = array("jpg", "jpeg", "png", "gif", "svg");
     $ext = pathinfo($file, PATHINFO_EXTENSION);
     if (!in_array($ext, $image_extensions)) return FALSE;
-
-    if (function_exists("image_get_info"))
-      return (strpos(@mime_content_type($file), 'image') === 0);
+    return (strpos(@mime_content_type($file), 'image') === 0);
 }
 
 function ophir_copy_file($from, $to) {
@@ -41,6 +40,7 @@ function ophir_copy_file($from, $to) {
     return ($filename) ? file_create_url($filename) : false;
   }else {
     if (file_exists($to)) {
+      if (crc32(file_get_contents($from)) === crc32(file_get_contents($from))) return $to;
       $i = pathinfo($to);
       $to = $i['dirname'] . '/' . $i['filename'] . time() . '.' . $i['extension'];
     }
@@ -86,18 +86,22 @@ function odt2html($odt_file, $xml_string=NULL) {
 
   $footnotes = "";
 
+  $translation_table = array ();
+  $translation_table['draw:frame'] = 'div class="odt-frame"';
   if ($_ophir_odt_import_conf["features"]["list"]===0) $translation_table["text:list"] = FALSE;
   elseif ($_ophir_odt_import_conf["features"]["list"]===2) {
     $translation_table["text:list"] = "ul";
     $translation_table["text:list-item"] = "li";
   }
-
-  $translation_table = array();
   if ($_ophir_odt_import_conf["features"]["table"]===0) $translation_table["table:table"] = FALSE;
   elseif ($_ophir_odt_import_conf["features"]["table"]===2) {
     $translation_table["table:table"] = "table cellspacing=0 cellpadding=0 border=1";
     $translation_table["table:table-row"] = "tr";
     $translation_table["table:table-cell"] = "td";
+  }
+  if ($_ophir_odt_import_conf["features"]["table of contents"]===0) $translation_table['text:table-of-content'] = FALSE;
+  elseif ($_ophir_odt_import_conf["features"]["table of contents"]===2) {
+    $translation_table['text:table-of-content'] = 'div class="odt-table-of-contents"';
   }
 
   //$xml->read(); echo "\n<br><code>\n" .str_replace("&lt", "\n<br><br>&lt", htmlspecialchars($xml->readInnerXML())). "\n</code><br>\n\n";
@@ -170,7 +174,7 @@ function odt2html($odt_file, $xml_string=NULL) {
             break;
           }
           elseif ($_ophir_odt_import_conf["features"]["image"]===1) break;
-
+          
           $image_file = 'zip://' . $odt_file . '#' . $xml->getAttribute("xlink:href");
           if (isset($_ophir_odt_import_conf["images_folder"]) &&
               is_dir($_ophir_odt_import_conf["images_folder"]) ) {
@@ -181,16 +185,15 @@ function odt2html($odt_file, $xml_string=NULL) {
                 break;
               } 
             } else {
-              ophir_error("Found invalid image file." . $image_file);
+              ophir_error("Found invalid image file.");
               break;
             } 
           }
           else {
-            ophir_error('Unable to save the image. Creating a data URL. Image saved directly in the body.');
+            ophir_error('Unable to save the image. Creating a data URL. Image saved directly in the body.F');
             $src = 'data:image;base64,' . base64_encode(file_get_contents($image_file));
           }
-          $html .= "\n<img src=\"$src\">";
-          $opened_tags[] = "img";
+          $html .= "\n<img src=\"$src\" />";
           break;
 
         case "style:style":
