@@ -50,7 +50,7 @@ function ophir_copy_file($from, $to) {
 
 function ophir_error($error){
   if (function_exists("drupal_set_message")){
-        drupal_set_message(t($error), 'error');
+        drupal_set_message($error, 'error');
   }else{
     echo '<div style="color:red;font-size:2em;">' . $error . '</div>';
   }

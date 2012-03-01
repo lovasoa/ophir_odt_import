@@ -26,6 +26,5 @@ function ophir_odt_import_requirements($phase) {
 
     break;
   }
-  drupal_set_message("Je suis là", "error");
   return $requirements;
 }
