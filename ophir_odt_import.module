@@ -23,7 +23,7 @@ function ophir_odt_import_form_node_form_alter(&$form, $form_state, $form_id) {
       '#type' => 'fieldset',
       '#title' => t('ODT file import'),
       '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
+      '#collapsed' => FALSE,
       '#description' => t('Select a file to import. This file will be parsed and set as content body. Make sure you do not have anything in the body field while importing an ODT file, as the import will overwrite the content body'),
       '#attributes' => array('id' => 'ophir_odt_import-fieldset'),
     );
