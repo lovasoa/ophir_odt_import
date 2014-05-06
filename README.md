@@ -7,9 +7,8 @@ The generated HTML markup is simple, and not all odt features are supported.
 This is based on a PHP script that converts ODT files to HTML, that you can find here: https://github.com/lovasoa/ophir.php
 
 ## Installation instructions
-In drupal, choose
-   Modules > Import from URL
-Enter the following url:
-    https://github.com/lovasoa/ophir.php/archive/master.zip
-You're done
+In drupal, choose __Modules__ > __Import from URL__
 
+Enter the following url: <code>https://github.com/lovasoa/ophir.php/archive/master.zip</code>
+
+Et voilà.
