@@ -1,6 +1,6 @@
 name = Ophir ODT Importer
 description = Enables creating content by importing ODT files.
-version = 0.03
+version = 0.04
 core = 7.x
 package = ODT
 files[] = ophir_odt_import.module
